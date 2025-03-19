@@ -6,7 +6,7 @@
     <title>VR Arkisto</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: none; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
         th { background-color: #f8f8f8; }
@@ -14,10 +14,20 @@
         .breadcrumb { margin-bottom: 10px; font-size: 14px; }
         .breadcrumb a { color: #666; font-weight: normal; margin-right: 5px; }
         .breadcrumb a:hover { text-decoration: underline; }
+        .password-container { text-align: center; margin-top: 100px; }
+        .password-container input { padding: 10px; font-size: 16px; }
+        .password-container button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <div class="password-container" id="password-container">
+        <h2>Syötä Salasana</h2>
+        <input type="password" id="password" placeholder="Syötä Salasana tähän">
+        <button onclick="checkPassword()">Jatka</button>
+    </div>
+
+    <div class="container" id="content-container">
         <h2>VR Arkisto</h2>
         <div class="breadcrumb" id="breadcrumb"></div>
         <table>
@@ -32,10 +42,22 @@
     </div>
     
     <script>
-        const username = "vrarkisto";
-        const repo = "vrarkisto.github.io";
+        const username = "aarnerantala";
+        const repo = "vrasiakirjat.github.io";
         const branch = "main";
+        const correctPassword = "sr123"; // 🔹 Salasana tallennetaan kuten muutkin muuttujat
         let currentPath = "";
+
+        function checkPassword() {
+            const inputPassword = document.getElementById("password").value;
+            if (inputPassword === correctPassword) { // 🔹 Suora vertailu ilman salausta
+                document.getElementById("password-container").style.display = "none";
+                document.getElementById("content-container").style.display = "block";
+                fetchFiles("");
+            } else {
+                alert("Incorrect password. Try again.");
+            }
+        }
 
         async function fetchFiles(directory) {
             currentPath = directory;
@@ -58,14 +80,13 @@
                 }
 
                 files.forEach(file => {
-                    if (file.name === ".github" || file.name === "index.html") return; // Skip unwanted files
+                    if (file.name === ".github" || file.name === "index.html") return;
                     
                     let tr = document.createElement("tr");
                     if (file.type === "dir") {
                         tr.innerHTML = `<td><a href="#" onclick="fetchFiles('${file.path}')">📁 ${file.name}</a></td><td>Folder</td>`;
                     } else {
                         const fileLink = `<a href="${file.download_url}" target="_blank">📄 ${file.name}</a>`;
-                        
                         tr.innerHTML = `<td>${fileLink}</td><td>File</td>`;
                     }
                     fileList.appendChild(tr);
@@ -99,8 +120,7 @@
 
             breadcrumb.innerHTML = breadcrumbHTML;
         }
-
-        fetchFiles("");
     </script>
+
 </body>
 </html>
