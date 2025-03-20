@@ -14,18 +14,9 @@
         .breadcrumb { margin-bottom: 10px; font-size: 14px; }
         .breadcrumb a { color: #666; font-weight: normal; margin-right: 5px; }
         .breadcrumb a:hover { text-decoration: underline; }
-        .password-container { text-align: center; margin-top: 100px; }
-        .password-container input { padding: 10px; font-size: 16px; }
-        .password-container button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div class="password-container" id="password-container">
-        <h2>Syötä Salasana</h2>
-        <input type="password" id="password" placeholder="Syötä Salasana tähän">
-        <button onclick="checkPassword()">Jatka</button>
-    </div>
 
     <div class="container" id="content-container">
         <h2>VR Arkisto</h2>
@@ -45,19 +36,7 @@
         const username = "aarnerantala";
         const repo = "vrasiakirjat.github.io";
         const branch = "main";
-        const correctPassword = "sr123"; // 🔹 Salasana tallennetaan kuten muutkin muuttujat
         let currentPath = "";
-
-        function checkPassword() {
-            const inputPassword = document.getElementById("password").value;
-            if (inputPassword === correctPassword) { // 🔹 Suora vertailu ilman salausta
-                document.getElementById("password-container").style.display = "none";
-                document.getElementById("content-container").style.display = "block";
-                fetchFiles("");
-            } else {
-                alert("Incorrect password. Try again.");
-            }
-        }
 
         async function fetchFiles(directory) {
             currentPath = directory;
