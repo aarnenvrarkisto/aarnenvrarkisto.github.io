@@ -6,7 +6,15 @@
     <title>VR Arkisto</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: none; }
+        .container { 
+            max-width: 800px; 
+            margin: auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+            display: none; /* Initially hidden */
+        }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
         th { background-color: #f8f8f8; }
@@ -28,7 +36,9 @@
                     <th>Tyyppi</th>
                 </tr>
             </thead>
-            <tbody id="file-list"></tbody>
+            <tbody id="file-list">
+                <tr><td colspan="2">Ladataan tiedostoja...</td></tr>
+            </tbody>
         </table>
     </div>
     
@@ -38,48 +48,51 @@
         const branch = "main";
         let currentPath = "";
 
-        async function fetchFiles(directory) {
+        async function fetchFiles(directory = "") {
             currentPath = directory;
             const url = `https://api.github.com/repos/${username}/${repo}/contents/${directory}?ref=${branch}`;
             
             try {
                 const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-                }
-                const files = await response.json();
+                if (!response.ok) throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
                 
+                const files = await response.json();
                 let fileList = document.getElementById("file-list");
                 fileList.innerHTML = "";
 
+                // Add "Go Back" button if not in root
                 if (directory) {
                     let tr = document.createElement("tr");
                     tr.innerHTML = `<td colspan="2"><a href="#" onclick="goBack()">⬅️ Takaisin</a></td>`;
                     fileList.appendChild(tr);
                 }
 
+                // List files and folders
                 files.forEach(file => {
                     if (file.name === ".github" || file.name === "index.html") return;
                     
                     let tr = document.createElement("tr");
                     if (file.type === "dir") {
-                        tr.innerHTML = `<td><a href="#" onclick="fetchFiles('${file.path}')">📁 ${file.name}</a></td><td>Folder</td>`;
+                        tr.innerHTML = `<td><a href="#" onclick="fetchFiles('${file.path}')">📁 ${file.name}</a></td><td>Kansio</td>`;
                     } else {
                         const fileLink = `<a href="${file.download_url}" target="_blank">📄 ${file.name}</a>`;
-                        tr.innerHTML = `<td>${fileLink}</td><td>File</td>`;
+                        tr.innerHTML = `<td>${fileLink}</td><td>Tiedosto</td>`;
                     }
                     fileList.appendChild(tr);
                 });
 
                 updateBreadcrumb(directory);
+                document.getElementById("content-container").style.display = "block"; // Show container
+
             } catch (error) {
                 console.error("Error fetching files:", error);
-                document.getElementById("file-list").innerHTML = "<tr><td colspan='2'>Error loading files. Check console for details.</td></tr>";
+                document.getElementById("file-list").innerHTML = "<tr><td colspan='2'>Virhe ladattaessa tiedostoja.</td></tr>";
             }
         }
 
         function goBack() {
-            const parts = currentPath.split("/");
+            if (!currentPath) return;
+            const parts = currentPath.split("/").filter(Boolean);
             parts.pop();
             fetchFiles(parts.join("/"));
         }
@@ -89,7 +102,7 @@
             let pathParts = directory ? directory.split("/") : [];
             let breadcrumbHTML = '<a href="#" onclick="fetchFiles(\'\')">🏠 Koti</a>';
             let fullPath = "";
-            
+
             pathParts.forEach((part, index) => {
                 if (part) {
                     fullPath += (index === 0 ? "" : "/") + part;
@@ -99,6 +112,9 @@
 
             breadcrumb.innerHTML = breadcrumbHTML;
         }
+
+        // Load files on page load
+        fetchFiles('');
     </script>
 
 </body>
