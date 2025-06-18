@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,7 @@
             padding: 20px; 
             border-radius: 8px; 
             box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-            display: none; /* Initially hidden */
+            display: none;
         }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
@@ -41,7 +41,43 @@
             </tbody>
         </table>
     </div>
-    
+
+    <!-- SALASANAKOODI -->
+    <script>
+        const correctPasswordURL = "https://raw.githubusercontent.com/aarnerantala/vrasiakirjat.github.io/main/vrsalasana/salasana.key";
+        const token = "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";
+
+        async function checkPassword() {
+            const input = prompt("Syötä salasana:");
+            try {
+                const response = await fetch(correctPasswordURL, {
+                    headers: {
+                        Authorization: `token ${token}`
+                    }
+                });
+                if (!response.ok) throw new Error("Virhe ladattaessa salasanaa");
+
+                const correctPassword = (await response.text()).trim();
+
+                if (input === correctPassword) {
+                    document.getElementById("content-container").style.display = "block";
+                    fetchFiles('');
+                } else {
+                    alert("Väärä salasana!");
+                    document.body.innerHTML = "<h2>Pääsy estetty</h2>";
+                }
+            } catch (e) {
+                alert("Virhe: " + e.message);
+                document.body.innerHTML = "<h2>Pääsy estetty</h2>";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            checkPassword();
+        });
+    </script>
+
+    <!-- TIEDOSTOLISTA -->
     <script>
         const username = "aarnerantala";
         const repo = "vrasiakirjat.github.io";
@@ -60,14 +96,12 @@
                 let fileList = document.getElementById("file-list");
                 fileList.innerHTML = "";
 
-                // Add "Go Back" button if not in root
                 if (directory) {
                     let tr = document.createElement("tr");
                     tr.innerHTML = `<td colspan="2"><a href="#" onclick="goBack()">⬅️ Takaisin</a></td>`;
                     fileList.appendChild(tr);
                 }
 
-                // List files and folders
                 files.forEach(file => {
                     if (file.name === ".github" || file.name === "index.html") return;
                     
@@ -82,7 +116,6 @@
                 });
 
                 updateBreadcrumb(directory);
-                document.getElementById("content-container").style.display = "block"; // Show container
 
             } catch (error) {
                 console.error("Error fetching files:", error);
@@ -112,9 +145,6 @@
 
             breadcrumb.innerHTML = breadcrumbHTML;
         }
-
-        // Load files on page load
-        fetchFiles('');
     </script>
 
 </body>
